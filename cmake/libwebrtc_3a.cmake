@@ -5,18 +5,17 @@ set (CURRENT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (abseil_source_path "${CURRENT_DIR}/../source/abseil-cpp")
 set (webrtc_source_path "${CURRENT_DIR}/../source/webrtc_m79")
 
-include(${CURRENT_DIR}/../source/librtcbase.cmake)
-include(${CURRENT_DIR}/../source/libaecm.cmake)
-include(${CURRENT_DIR}/../source/libasp.cmake)
+include(${CURRENT_DIR}/../cmake/librtcbase.cmake)
+include(${CURRENT_DIR}/../cmake/libaecm.cmake)
+include(${CURRENT_DIR}/../cmake/libasp.cmake)
+include(${CURRENT_DIR}/../cmake/libaec3.cmake)
 
 include_directories(${abseil_source_path})
 include_directories(${webrtc_source_path})
 include_directories(${webrtc_source_path}/common_audio/signal_processing/include)
-include_directories(${CURRENT_DIR}/../source/pthread)
-
-set (PTHREAD_LIB "${CURRENT_DIR}/../source/pthread")
 
 ADD_DEFINITIONS(
+		-DWEBRTC_APM_DEBUG_DUMP=0
 		-DHAVE_LRINT
 		-DHAVE_LRINTF
 		-DWEBRTC_WIN
@@ -46,13 +45,20 @@ set(webrtc_SOURCES
 	${webrtc_source_path}/modules/audio_processing/utility/delay_estimator.cc
 	${webrtc_source_path}/modules/audio_processing/utility/delay_estimator_wrapper.cc
 	${webrtc_source_path}/modules/audio_processing/utility/ooura_fft.cc
+	${webrtc_source_path}/modules/audio_processing/logging/apm_data_dumper.cc
+	${webrtc_source_path}/modules/audio_processing/high_pass_filter.cc
 	${webrtc_source_path}/common_audio/ring_buffer.c
 	${webrtc_source_path}/common_audio/third_party/spl_sqrt_floor/spl_sqrt_floor.c
+	${webrtc_source_path}/api/audio/echo_canceller3_config.cc
+	${webrtc_source_path}/api/audio/echo_canceller3_factory.cc
 	${webrtc_source_path}/api/task_queue/task_queue_base.cc
 	${webrtc_source_path}/system_wrappers/source/cpu_features.cc
+	${webrtc_source_path}/system_wrappers/source/field_trial.cc
+	${webrtc_source_path}/system_wrappers/source/metrics.cc
 	$<TARGET_OBJECTS:librtcbase>
 	$<TARGET_OBJECTS:libaecm>
 	$<TARGET_OBJECTS:libasp>
+	$<TARGET_OBJECTS:libaec3>
 )
 
 if (WINDOWS_PLATFORM)
@@ -71,11 +77,6 @@ add_library(webrtc_3a
 		SHARED
 		${webrtc_SOURCES}
 		)
-
-#find_library(pthread-lib pthread PATHS ${PTHREAD_LIB} NO_CMAKE_FIND_ROOT_PATH)
-
-#add_library(pthread STATIC IMPORTED)
-#set_target_properties(pthread PROPERTIES IMPORTED_LOCATION ${PTHREAD_LIB}/libpthread.lib)
 
 if (WINDOWS_PLATFORM)
 add_library(winmm STATIC IMPORTED)
