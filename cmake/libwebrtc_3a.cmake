@@ -1,20 +1,31 @@
 option(WINDOWS_PLATFORM "Set to switch to build windows platform" ON)
+option(ANDROID_PLATFORM "Set to switch to build windows platform" OFF)
 
 set (CURRENT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set (abseil_source_path "${CURRENT_DIR}/../source/abseil-cpp")
 set (webrtc_source_path "${CURRENT_DIR}/../source/webrtc_m79")
+set (rnnoise_source_path "${CURRENT_DIR}/../third_party/rnnoise/src")
+set (pffft_source_path "${CURRENT_DIR}/../third_party/pffft/src")
 
 include(${CURRENT_DIR}/../cmake/librtcbase.cmake)
 include(${CURRENT_DIR}/../cmake/libaecm.cmake)
 include(${CURRENT_DIR}/../cmake/libasp.cmake)
 include(${CURRENT_DIR}/../cmake/libaec3.cmake)
+include(${CURRENT_DIR}/../cmake/libagc.cmake)
+include(${CURRENT_DIR}/../cmake/libagc2.cmake)
+include(${CURRENT_DIR}/../cmake/libans.cmake)
+include(${CURRENT_DIR}/../cmake/libvad.cmake)
 
+include_directories("${CURRENT_DIR}/../")
 include_directories(${abseil_source_path})
 include_directories(${webrtc_source_path})
 include_directories(${webrtc_source_path}/common_audio/signal_processing/include)
+include_directories(${rnnoise_source_path})
+include_directories(${pffft_source_path})
 
 ADD_DEFINITIONS(
+		-DWEBRTC_NS_FLOAT
 		-DWEBRTC_APM_DEBUG_DUMP=0
 		-DHAVE_LRINT
 		-DHAVE_LRINTF
@@ -23,9 +34,11 @@ ADD_DEFINITIONS(
 		#-DWEBRTC_LINUX
 		#-DWEBRTC_ANDROID
 		#-DWEBRTC_MAC
+		#-DWEBRTC_IOS
 )
 
 if (WINDOWS_PLATFORM)
+    ADD_DEFINITIONS(-D_USE_MATH_DEFINES)
 	ADD_DEFINITIONS(-DNOMINMAX)
 	ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 endif()
@@ -55,10 +68,16 @@ set(webrtc_SOURCES
 	${webrtc_source_path}/system_wrappers/source/cpu_features.cc
 	${webrtc_source_path}/system_wrappers/source/field_trial.cc
 	${webrtc_source_path}/system_wrappers/source/metrics.cc
+	${pffft_source_path}/pffft.c
+	${webrtc_source_path}/modules/audio_processing/utility/pffft_wrapper.cc
 	$<TARGET_OBJECTS:librtcbase>
 	$<TARGET_OBJECTS:libaecm>
 	$<TARGET_OBJECTS:libasp>
 	$<TARGET_OBJECTS:libaec3>
+	$<TARGET_OBJECTS:libagc>
+	$<TARGET_OBJECTS:libagc2>
+	$<TARGET_OBJECTS:libans>
+	$<TARGET_OBJECTS:libvad>
 )
 
 if (WINDOWS_PLATFORM)
